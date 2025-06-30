@@ -14,6 +14,11 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
+extern crate alloc;
+
+use alloc::boxed::Box;
+use alloc::vec::Vec;
+
 use agb::{
     include_aseprite,
     include_background_gfx,
@@ -69,6 +74,59 @@ impl Sprite <'_> {
     }
 }
 
+// is there a good way to have the internal structure be the same universally, but assign behave dynamically?
+
+trait GameObject {
+    fn behave(&mut self);
+    fn render(&mut self);
+}
+
+pub struct Player <'a> {
+    sprite: Sprite <'a>,
+    input: ButtonController
+}
+
+impl GameObject for Player<'_> {
+    fn behave(&mut self) {
+        self.input.update();
+
+        if self.input.is_pressed(Button::UP) && self.sprite.y > 0 {
+            self.sprite.update_pos(Direction::UP);
+        }
+        if self.input.is_pressed(Button::DOWN) && self.sprite.y < agb::display::HEIGHT - BALL_SIZE {
+            self.sprite.update_pos(Direction::DOWN);
+        }
+        if self.input.is_pressed(Button::LEFT) && self.sprite.x > 0 {
+            self.sprite.update_pos(Direction::LEFT);
+        }
+        if self.input.is_pressed(Button::RIGHT) && self.sprite.x < agb::display::WIDTH - BALL_SIZE {
+            self.sprite.update_pos(Direction::RIGHT);
+        }
+    }
+
+    fn render(&mut self) {
+        self.sprite.object.set_x(self.sprite.x as u16).set_y(self.sprite.y as u16).show();
+    }
+}
+
+pub struct MovingStone <'a> {
+    sprite: Sprite <'a>
+}
+
+impl GameObject for MovingStone<'_> {
+    fn behave(&mut self) {
+        if self.sprite.x+BALL_SIZE <= 0 {
+            self.sprite.x = agb::display::WIDTH;
+        } else {
+            self.sprite.update_pos(Direction::LEFT);
+        }
+    }
+
+    fn render(&mut self) {
+        self.sprite.object.set_x(self.sprite.x as u16).set_y(self.sprite.y as u16).show();
+    }
+}
+
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack
 // and interrupt handlers correctly. It will also handle creating the `Gba` struct for you.
@@ -84,23 +142,31 @@ fn main(mut gba: agb::Gba) -> ! {
         });
     };
 
-    let mut input = ButtonController::new();
     let (gfx, mut vram) = gba.display.video.tiled0();
 
-    // Create an object with the ball sprite
-    let mut ball = Sprite {
-        x: agb::display::WIDTH / 2 - BALL_SIZE/2,
-        y: agb::display::HEIGHT / 2 - BALL_SIZE/2,
-        velocity: 1,
-        object: oam.object_sprite(BALL.sprite(0)),
-    };
-
-    let mut ball2 = Sprite {
-        x: agb::display::WIDTH - BALL_SIZE,
-        y: agb::display::HEIGHT - BALL_SIZE,
-        velocity: 1,
-        object: oam.object_sprite(BALL.sprite(0)),
-    };
+    // Create objects with the ball sprite
+    let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
+    gameobjects.push(Box::new(
+        Player {
+            sprite: Sprite{
+                x: agb::display::WIDTH / 2 - BALL_SIZE/2,
+                y: agb::display::HEIGHT / 2 - BALL_SIZE/2,
+                velocity: 1,
+                object: oam.object_sprite(BALL.sprite(0)),
+            },
+            input: ButtonController::new()  // supposedly I can create two of these, but not sure how it would behave in practice
+        }
+    ));
+    gameobjects.push(Box::new(
+        MovingStone {
+            sprite: Sprite{
+                x: agb::display::WIDTH - BALL_SIZE,
+                y: agb::display::HEIGHT - BALL_SIZE,
+                velocity: 1,
+                object: oam.object_sprite(BALL.sprite(0)),
+            }
+        }
+    ));
 
     let tileset = &map_tiles::tiles.tiles;
 
@@ -123,30 +189,10 @@ fn main(mut gba: agb::Gba) -> ! {
 
     // game loop
     loop {
-        // handle input to move ball
-        input.update();
-        if input.is_pressed(Button::UP) && ball.y > 0 {
-            ball.update_pos(Direction::UP);
+        for gameobject in gameobjects.iter_mut() {
+            gameobject.behave();
+            gameobject.render();
         }
-        if input.is_pressed(Button::DOWN) && ball.y < agb::display::HEIGHT - 16 {
-            ball.update_pos(Direction::DOWN);
-        }
-        if input.is_pressed(Button::LEFT) && ball.x > 0 {
-            ball.update_pos(Direction::LEFT);
-        }
-        if input.is_pressed(Button::RIGHT) && ball.x < agb::display::WIDTH - 16 {
-            ball.update_pos(Direction::RIGHT);
-        }
-
-        if ball2.x+BALL_SIZE <= 0 {
-            ball2.x = agb::display::WIDTH;
-        } else {
-            ball2.update_pos(Direction::LEFT);
-        }
-
-        // Set the position of the sprite to match our new calculated position
-        ball.object.set_x(ball.x as u16).set_y(ball.y as u16).show();
-        ball2.object.set_x(ball2.x as u16).set_y(ball2.y as u16).show();
     
         // Wait for vblank, then commit the objects to the screen
         // todo: don't busy wait for vblank, use interrupt

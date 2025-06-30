@@ -42,6 +42,7 @@ include_background_gfx!(map_tiles, tiles => "gfx/water_tiles.png");
 /*const PADDLE_END: &Tag = GRAPHICS.tags().get("Paddle End");
 const PADDLE_MID: &Tag = GRAPHICS.tags().get("Paddle Mid");*/
 static BALL: &Tag = GRAPHICS.tags().get("Ball");
+const BALL_SIZE: i32 = 16;
 
 pub enum Direction {
     UP,
@@ -54,7 +55,7 @@ pub struct Sprite <'a> {
     x: i32,
     y: i32,
     velocity: i32,
-    object: Object <'a>
+    object: Object <'a>,
 }
 
 impl Sprite <'_> {
@@ -88,10 +89,17 @@ fn main(mut gba: agb::Gba) -> ! {
 
     // Create an object with the ball sprite
     let mut ball = Sprite {
-        x: agb::display::WIDTH / 2 - 8,     // todo: make 16 a constant
-        y: agb::display::HEIGHT / 2 - 8,
+        x: agb::display::WIDTH / 2 - BALL_SIZE/2,
+        y: agb::display::HEIGHT / 2 - BALL_SIZE/2,
         velocity: 1,
-        object: oam.object_sprite(BALL.sprite(0))
+        object: oam.object_sprite(BALL.sprite(0)),
+    };
+
+    let mut ball2 = Sprite {
+        x: agb::display::WIDTH - BALL_SIZE,
+        y: agb::display::HEIGHT - BALL_SIZE,
+        velocity: 1,
+        object: oam.object_sprite(BALL.sprite(0)),
     };
 
     let tileset = &map_tiles::tiles.tiles;
@@ -130,8 +138,15 @@ fn main(mut gba: agb::Gba) -> ! {
             ball.update_pos(Direction::RIGHT);
         }
 
+        if ball2.x+BALL_SIZE <= 0 {
+            ball2.x = agb::display::WIDTH;
+        } else {
+            ball2.update_pos(Direction::LEFT);
+        }
+
         // Set the position of the sprite to match our new calculated position
         ball.object.set_x(ball.x as u16).set_y(ball.y as u16).show();
+        ball2.object.set_x(ball2.x as u16).set_y(ball2.y as u16).show();
     
         // Wait for vblank, then commit the objects to the screen
         // todo: don't busy wait for vblank, use interrupt

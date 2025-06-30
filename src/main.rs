@@ -14,9 +14,16 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
-//use agb::{display, syscall};
-use agb::{include_aseprite,
-    display::object::{Graphics, Tag, Object}
+use agb::{
+    include_aseprite,
+    include_background_gfx,
+    display::{
+        object::{Graphics, Tag, Object},
+        tiled::{
+            RegularBackgroundSize, TiledMap,
+        },
+        Priority,
+    },
 };
 use agb::interrupt::{Interrupt, add_interrupt_handler};
 use agb::input::{Button, ButtonController};
@@ -25,6 +32,11 @@ use critical_section::CriticalSection;
 // Import the sprites in to this static. This holds the sprite 
 // and palette data in a way that is manageable by agb.
 static GRAPHICS: &Graphics = include_aseprite!("gfx/sprites.aseprite");
+//include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");
+//use sprites::{JUMP, WALK};
+//static IDLE: &Sprite = sprites::IDLE.sprite(0);
+
+include_background_gfx!(map_tiles, tiles => "gfx/water_tiles.png");
 
 // We define some easy ways of referencing the sprites
 /*const PADDLE_END: &Tag = GRAPHICS.tags().get("Paddle End");
@@ -62,25 +74,46 @@ impl Sprite <'_> {
 #[agb::entry]
 fn main(mut gba: agb::Gba) -> ! {    
     // Get the OAM manager
-    let object = gba.display.object.get_managed();
+    let oam = gba.display.object.get_managed();
 
     // vblank interrupt handler
-    unsafe {
+   unsafe {
         let _ = add_interrupt_handler(Interrupt::VBlank, |_: CriticalSection| {
             agb::println!("Woah there! There's been a vblank!");
         });
     };
 
     let mut input = ButtonController::new();
+    let (gfx, mut vram) = gba.display.video.tiled0();
 
     // Create an object with the ball sprite
     let mut ball = Sprite {
         x: agb::display::WIDTH / 2 - 8,     // todo: make 16 a constant
         y: agb::display::HEIGHT / 2 - 8,
         velocity: 1,
-        object: object.object_sprite(BALL.sprite(0))
+        object: oam.object_sprite(BALL.sprite(0))
     };
-    
+
+    let tileset = &map_tiles::tiles.tiles;
+
+    vram.set_background_palettes(map_tiles::PALETTES);
+
+    let mut bg = gfx.background(Priority::P0, RegularBackgroundSize::Background32x32, tileset.format());
+
+    for y in 0..20u16 {
+        for x in 0..30u16 {
+            bg.set_tile(
+                &mut vram,
+                (x, y),
+                tileset,
+                map_tiles::tiles.tile_settings[0],
+            );
+        }
+    }
+    bg.commit(&mut vram);
+    bg.set_visible(true);
+
+    // game loop
     loop {
         // handle input to move ball
         input.update();
@@ -103,6 +136,6 @@ fn main(mut gba: agb::Gba) -> ! {
         // Wait for vblank, then commit the objects to the screen
         // todo: don't busy wait for vblank, use interrupt
         agb::display::busy_wait_for_vblank();
-        object.commit();
+        oam.commit();
     }
 }

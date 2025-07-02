@@ -9,11 +9,11 @@ pub struct MovingStone <'a> {
 }
 
 impl <'a> MovingStone<'a> {
-    pub fn new(object: Object<'a>) -> MovingStone<'a> {
+    pub fn new(x_start: i32, y_start: i32, object: Object<'a>) -> MovingStone<'a> {
         Self {
             sprite: Sprite::new(
-                agb::display::WIDTH / 2 - BALL_SIZE/2,
-                agb::display::HEIGHT / 2 - BALL_SIZE/2,
+                x_start,
+                y_start,
                 1,
                 object
             ),

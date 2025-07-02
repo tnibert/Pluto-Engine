@@ -17,6 +17,8 @@
 use lib::gameobject::GameObject;
 use lib::player::Player;
 use lib::movingstone::MovingStone;
+use lib::sprite::Sprite;
+use lib::BALL_SIZE;
 
 extern crate alloc;
 
@@ -47,8 +49,8 @@ static GRAPHICS: &Graphics = include_aseprite!("gfx/sprites.aseprite");
 include_background_gfx!(map_tiles, tiles => "gfx/water_tiles.png");
 
 // We define some easy ways of referencing the sprites
-/*const PADDLE_END: &Tag = GRAPHICS.tags().get("Paddle End");
-const PADDLE_MID: &Tag = GRAPHICS.tags().get("Paddle Mid");*/
+const PADDLE_END: &Tag = GRAPHICS.tags().get("Paddle End");
+const PADDLE_MID: &Tag = GRAPHICS.tags().get("Paddle Mid");
 static BALL: &Tag = GRAPHICS.tags().get("Ball");
 
 // The main function must take 1 arguments and never return. The agb::entry decorator
@@ -74,7 +76,10 @@ fn main(mut gba: agb::Gba) -> ! {
         Player::new(oam.object_sprite(BALL.sprite(0)))
     ));
     gameobjects.push(Box::new(
-        MovingStone::new(oam.object_sprite(BALL.sprite(0)))
+        MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, oam.object_sprite(PADDLE_MID.sprite(0)))
+    ));
+    gameobjects.push(Box::new(
+        Sprite::new(20, 20, 0, oam.object_sprite(PADDLE_END.sprite(0)))
     ));
 
     // create background

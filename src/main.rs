@@ -14,6 +14,10 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
+use lib::gameobject::GameObject;
+use lib::player::Player;
+use lib::movingstone::MovingStone;
+
 extern crate alloc;
 
 use alloc::boxed::Box;
@@ -23,7 +27,7 @@ use agb::{
     include_aseprite,
     include_background_gfx,
     display::{
-        object::{Graphics, Tag, Object},
+        object::{Graphics, Tag},
         tiled::{
             RegularBackgroundSize, TiledMap,
         },
@@ -31,7 +35,6 @@ use agb::{
     },
 };
 use agb::interrupt::{Interrupt, add_interrupt_handler};
-use agb::input::{Button, ButtonController};
 use critical_section::CriticalSection;
 
 // Import the sprites in to this static. This holds the sprite 
@@ -47,85 +50,6 @@ include_background_gfx!(map_tiles, tiles => "gfx/water_tiles.png");
 /*const PADDLE_END: &Tag = GRAPHICS.tags().get("Paddle End");
 const PADDLE_MID: &Tag = GRAPHICS.tags().get("Paddle Mid");*/
 static BALL: &Tag = GRAPHICS.tags().get("Ball");
-const BALL_SIZE: i32 = 16;
-
-pub enum Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
-}
-
-pub struct Sprite <'a> {
-    x: i32,
-    y: i32,
-    velocity: i32,
-    object: Object <'a>,
-}
-
-impl Sprite <'_> {
-    pub fn update_pos(&mut self, dir: Direction) {
-        match dir {
-            Direction::LEFT => self.x -= self.velocity,
-            Direction::RIGHT => self.x += self.velocity,
-            Direction::UP => self.y -= self.velocity,
-            Direction::DOWN => self.y += self.velocity
-        }
-    }
-}
-
-// is there a good way to have the internal structure be the same universally, but assign behave dynamically?
-
-trait GameObject {
-    fn behave(&mut self);
-    fn render(&mut self);
-}
-
-pub struct Player <'a> {
-    sprite: Sprite <'a>,
-    input: ButtonController
-}
-
-impl GameObject for Player<'_> {
-    fn behave(&mut self) {
-        self.input.update();
-
-        if self.input.is_pressed(Button::UP) && self.sprite.y > 0 {
-            self.sprite.update_pos(Direction::UP);
-        }
-        if self.input.is_pressed(Button::DOWN) && self.sprite.y < agb::display::HEIGHT - BALL_SIZE {
-            self.sprite.update_pos(Direction::DOWN);
-        }
-        if self.input.is_pressed(Button::LEFT) && self.sprite.x > 0 {
-            self.sprite.update_pos(Direction::LEFT);
-        }
-        if self.input.is_pressed(Button::RIGHT) && self.sprite.x < agb::display::WIDTH - BALL_SIZE {
-            self.sprite.update_pos(Direction::RIGHT);
-        }
-    }
-
-    fn render(&mut self) {
-        self.sprite.object.set_x(self.sprite.x as u16).set_y(self.sprite.y as u16).show();
-    }
-}
-
-pub struct MovingStone <'a> {
-    sprite: Sprite <'a>
-}
-
-impl GameObject for MovingStone<'_> {
-    fn behave(&mut self) {
-        if self.sprite.x+BALL_SIZE <= 0 {
-            self.sprite.x = agb::display::WIDTH;
-        } else {
-            self.sprite.update_pos(Direction::LEFT);
-        }
-    }
-
-    fn render(&mut self) {
-        self.sprite.object.set_x(self.sprite.x as u16).set_y(self.sprite.y as u16).show();
-    }
-}
 
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack
@@ -147,31 +71,15 @@ fn main(mut gba: agb::Gba) -> ! {
     // Create objects with the ball sprite
     let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
     gameobjects.push(Box::new(
-        Player {
-            sprite: Sprite{
-                x: agb::display::WIDTH / 2 - BALL_SIZE/2,
-                y: agb::display::HEIGHT / 2 - BALL_SIZE/2,
-                velocity: 1,
-                object: oam.object_sprite(BALL.sprite(0)),
-            },
-            input: ButtonController::new()  // supposedly I can create two of these, but not sure how it would behave in practice
-        }
+        Player::new(oam.object_sprite(BALL.sprite(0)))
     ));
     gameobjects.push(Box::new(
-        MovingStone {
-            sprite: Sprite{
-                x: agb::display::WIDTH - BALL_SIZE,
-                y: agb::display::HEIGHT - BALL_SIZE,
-                velocity: 1,
-                object: oam.object_sprite(BALL.sprite(0)),
-            }
-        }
+        MovingStone::new(oam.object_sprite(BALL.sprite(0)))
     ));
 
+    // create background
     let tileset = &map_tiles::tiles.tiles;
-
     vram.set_background_palettes(map_tiles::PALETTES);
-
     let mut bg = gfx.background(Priority::P0, RegularBackgroundSize::Background32x32, tileset.format());
 
     for y in 0..20u16 {

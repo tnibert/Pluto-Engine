@@ -6,6 +6,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "lib"
+path = "src/lib.rs"
+
 [dependencies]
 agb = "0.21.3"
 critical-section = "1.2.0"

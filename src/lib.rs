@@ -11,6 +11,7 @@ pub mod sprite;
 pub mod player;
 pub mod gameobject;
 pub mod movingstone;
+pub mod observer;
 pub mod background;
 include_background_gfx!(pub mod agb_background, TILES => "gfx/beach-background.aseprite");
 

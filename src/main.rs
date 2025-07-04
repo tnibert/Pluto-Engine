@@ -26,6 +26,7 @@ extern crate alloc;
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
+use alloc::string::String;
 
 use agb::{
     display::{
@@ -71,19 +72,23 @@ fn main(mut gba: agb::Gba) -> ! {
 
     // Create game objects
     let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
-    gameobjects.push(Box::new(
-        Player::new(ball)
-    ));
-    gameobjects.push(Box::new(
-        MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid)
-    ));
+    let player = Box::new(Player::new(ball));
+    let mut moving_stone = Box::new(MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid));
+
+    // set up communication pathways
+    let mut evts = Vec::new();
+    evts.push(String::from("reset"));
+    moving_stone.subscribe(player.observer.clone(), evts);
+
+    gameobjects.push(player);
+    gameobjects.push(moving_stone);
     gameobjects.push(Box::new(
         Sprite::new(20, 20, 0, paddle_end)
     ));
     gameobjects.push(Box::new(
         Background::new()
     ));
-    
+
     // game loop
     loop {
         let mut frame = gfx.frame();

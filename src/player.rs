@@ -1,13 +1,18 @@
+extern crate alloc;
+
 use crate::gameobject::GameObject;
+use crate::observer::Listener;
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
 use agb::input::{Button, ButtonController};
+use alloc::rc::Rc;
 
 pub struct Player {
     sprite: Sprite,
-    input: ButtonController
+    input: ButtonController,
+    pub observer: Rc<Listener>
 }
 
 impl Player {
@@ -19,7 +24,8 @@ impl Player {
                 1,
                 object
             ),
-            input: ButtonController::new()  // supposedly I can create two of these, should test how it behaves in practice
+            input: ButtonController::new(),  // supposedly I can create two of these, should test how it behaves in practice
+            observer: Rc::new(Listener::new())
         }
     }
 }
@@ -39,6 +45,19 @@ impl GameObject for Player {
         }
         if self.input.is_pressed(Button::RIGHT) && self.sprite.get_x() < agb::display::WIDTH - BALL_SIZE {
             self.sprite.update_pos(Direction::RIGHT);
+        }
+
+        // check event subscriptions
+        for e in self.observer.poll_evt() {
+            match e.as_str() {
+                "reset" => {
+                    for _ in 0..10 {
+                        // just a test to make sure it works
+                        self.sprite.update_pos(Direction::DOWN);
+                    }
+                },
+                _ => ()
+            }
         }
     }
 

@@ -18,6 +18,8 @@ use lib::gameobject::GameObject;
 use lib::player::Player;
 use lib::movingstone::MovingStone;
 use lib::sprite::Sprite;
+use lib::background::Background;
+use lib::agb_background;
 use lib::BALL_SIZE;
 
 extern crate alloc;
@@ -27,12 +29,11 @@ use alloc::vec::Vec;
 
 use agb::{
     display::{
-        object::Object, tiled::{
-            RegularBackground, RegularBackgroundSize, TileFormat
-        }, Priority,
+        object::Object,
         tiled::VRAM_MANAGER
-    }, include_aseprite, include_background_gfx,
-    interrupt::{Interrupt, add_interrupt_handler}
+    },
+    include_aseprite,
+    interrupt::{add_interrupt_handler, Interrupt}
 };
 use critical_section::CriticalSection;
 
@@ -42,11 +43,10 @@ include_aseprite!(
     mod agb_sprites,
     "gfx/sprites.aseprite"
 );
+
 //include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");
 //use sprites::{JUMP, WALK};
 //static IDLE: &Sprite = sprites::IDLE.sprite(0);
-
-include_background_gfx!(mod background, TILES => "gfx/beach-background.aseprite");
 
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack
@@ -67,9 +67,9 @@ fn main(mut gba: agb::Gba) -> ! {
         });
     };
 
-    VRAM_MANAGER.set_background_palettes(background::PALETTES);
+    VRAM_MANAGER.set_background_palettes(agb_background::PALETTES);
 
-    // Create objects with the ball sprite
+    // Create game objects
     let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
     gameobjects.push(Box::new(
         Player::new(ball)
@@ -80,17 +80,10 @@ fn main(mut gba: agb::Gba) -> ! {
     gameobjects.push(Box::new(
         Sprite::new(20, 20, 0, paddle_end)
     ));
-
-    // create background
-    VRAM_MANAGER.set_background_palettes(background::PALETTES);
-    let mut bg = RegularBackground::new(
-        Priority::P3,
-        RegularBackgroundSize::Background32x32,
-        TileFormat::FourBpp
-    );
-
-    bg.fill_with(&background::TILES);
-
+    gameobjects.push(Box::new(
+        Background::new()
+    ));
+    
     // game loop
     loop {
         let mut frame = gfx.frame();
@@ -98,8 +91,6 @@ fn main(mut gba: agb::Gba) -> ! {
             gameobject.behave();
             gameobject.render(&mut frame);
         }
-    
-        bg.show(&mut frame);
         frame.commit();
     }
 }

@@ -5,9 +5,14 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
+use agb::include_background_gfx;
+
 pub mod sprite;
 pub mod player;
 pub mod gameobject;
 pub mod movingstone;
+pub mod background;
+include_background_gfx!(pub mod agb_background, TILES => "gfx/beach-background.aseprite");
 
-pub const BALL_SIZE: i32 = 16;
+
+pub const BALL_SIZE: i32 = 16; // todo: retrieve this value from the sprite

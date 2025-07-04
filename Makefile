@@ -1,9 +1,12 @@
+build:
+	cargo build --release
+	agb-gbafix target/thumbv4t-none-eabi/release/saturn_engine -o test.gba
+
 run: build
 	mgba-qt test.gba
 
-build:
-	cargo build --release
-	agb-gbafix target/thumbv4t-none-eabi/release/agb_play -o test.gba
-
+# Load the rom onto the Analogue Pocket
+MNTPATH=/run/media/tim/pocket
 pocket:
-	cp test.gba /run/media/tim/pocket/Assets/gba/common/homebrew/test.gba
+	mkdir -p $(MNTPATH)/Assets/gba/common/homebrew
+	cp test.gba $(MNTPATH)/Assets/gba/common/homebrew/test.gba

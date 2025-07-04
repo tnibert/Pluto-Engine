@@ -13,7 +13,7 @@ pub mod gameobject;
 pub mod movingstone;
 pub mod observer;
 pub mod background;
-include_background_gfx!(pub mod agb_background, TILES => "gfx/beach-background.aseprite");
+include_background_gfx!(pub mod agb_background, TILES => deduplicate "gfx/beach-background.aseprite");
 
 
 pub const BALL_SIZE: i32 = 16; // todo: retrieve this value from the sprite

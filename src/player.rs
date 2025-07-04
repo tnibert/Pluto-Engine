@@ -2,15 +2,16 @@ use crate::gameobject::GameObject;
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 use agb::display::object::Object;
+use agb::display::GraphicsFrame;
 use agb::input::{Button, ButtonController};
 
-pub struct Player <'a> {
-    sprite: Sprite <'a>,
+pub struct Player {
+    sprite: Sprite,
     input: ButtonController
 }
 
-impl <'a> Player<'a> {
-    pub fn new(object: Object<'a>) -> Player<'a> {
+impl Player {
+    pub fn new(object: Object) -> Player {
         Self {
             sprite: Sprite::new(
                 agb::display::WIDTH / 2 - BALL_SIZE/2,
@@ -23,7 +24,7 @@ impl <'a> Player<'a> {
     }
 }
 
-impl GameObject for Player<'_> {
+impl GameObject for Player {
     fn behave(&mut self) {
         self.input.update();
 
@@ -41,7 +42,7 @@ impl GameObject for Player<'_> {
         }
     }
 
-    fn render(&mut self) {
-        self.sprite.render();
+    fn render(&mut self, frame: &mut GraphicsFrame) {
+        self.sprite.render(frame);
     }
 }

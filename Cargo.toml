@@ -11,7 +11,7 @@ name = "lib"
 path = "src/lib.rs"
 
 [dependencies]
-agb = "0.21.3"
+agb = "0.22.2"
 critical-section = "1.2.0"
 
 [profile.dev]

@@ -26,90 +26,80 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 
 use agb::{
-    include_aseprite,
-    include_background_gfx,
     display::{
-        object::{Graphics, Tag},
-        tiled::{
-            RegularBackgroundSize, TiledMap,
-        },
-        Priority,
-    },
+        object::Object, tiled::{
+            RegularBackground, RegularBackgroundSize, TileFormat
+        }, Priority,
+        tiled::VRAM_MANAGER
+    }, include_aseprite, include_background_gfx,
+    interrupt::{Interrupt, add_interrupt_handler}
 };
-use agb::interrupt::{Interrupt, add_interrupt_handler};
 use critical_section::CriticalSection;
 
 // Import the sprites in to this static. This holds the sprite 
 // and palette data in a way that is manageable by agb.
-static GRAPHICS: &Graphics = include_aseprite!("gfx/sprites.aseprite");
+include_aseprite!(
+    mod agb_sprites,
+    "gfx/sprites.aseprite"
+);
 //include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");
 //use sprites::{JUMP, WALK};
 //static IDLE: &Sprite = sprites::IDLE.sprite(0);
 
-include_background_gfx!(map_tiles, tiles => "gfx/water_tiles.png");
-
-// We define some easy ways of referencing the sprites
-const PADDLE_END: &Tag = GRAPHICS.tags().get("Paddle End");
-const PADDLE_MID: &Tag = GRAPHICS.tags().get("Paddle Mid");
-static BALL: &Tag = GRAPHICS.tags().get("Ball");
+include_background_gfx!(mod background, TILES => "gfx/beach-background.aseprite");
 
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack
 // and interrupt handlers correctly. It will also handle creating the `Gba` struct for you.
 #[agb::entry]
-fn main(mut gba: agb::Gba) -> ! {    
-    // Get the OAM manager
-    let oam = gba.display.object.get_managed();
+fn main(mut gba: agb::Gba) -> ! {
+    // Get the graphics manager, responsible for all the graphics
+    let mut gfx = gba.graphics.get();
+
+    let ball = Object::new(agb_sprites::BALL.sprite(0));
+    let paddle_mid = Object::new(agb_sprites::PADDLE_MID.sprite(0));
+    let paddle_end = Object::new(agb_sprites::PADDLE_END.sprite(0));
 
     // vblank interrupt handler
-   unsafe {
+    unsafe {
         let _ = add_interrupt_handler(Interrupt::VBlank, |_: CriticalSection| {
             agb::println!("Woah there! There's been a vblank!");
         });
     };
 
-    let (gfx, mut vram) = gba.display.video.tiled0();
+    VRAM_MANAGER.set_background_palettes(background::PALETTES);
 
     // Create objects with the ball sprite
     let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
     gameobjects.push(Box::new(
-        Player::new(oam.object_sprite(BALL.sprite(0)))
+        Player::new(ball)
     ));
     gameobjects.push(Box::new(
-        MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, oam.object_sprite(PADDLE_MID.sprite(0)))
+        MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid)
     ));
     gameobjects.push(Box::new(
-        Sprite::new(20, 20, 0, oam.object_sprite(PADDLE_END.sprite(0)))
+        Sprite::new(20, 20, 0, paddle_end)
     ));
 
     // create background
-    let tileset = &map_tiles::tiles.tiles;
-    vram.set_background_palettes(map_tiles::PALETTES);
-    let mut bg = gfx.background(Priority::P0, RegularBackgroundSize::Background32x32, tileset.format());
+    VRAM_MANAGER.set_background_palettes(background::PALETTES);
+    let mut bg = RegularBackground::new(
+        Priority::P3,
+        RegularBackgroundSize::Background32x32,
+        TileFormat::FourBpp
+    );
 
-    for y in 0..20u16 {
-        for x in 0..30u16 {
-            bg.set_tile(
-                &mut vram,
-                (x, y),
-                tileset,
-                map_tiles::tiles.tile_settings[0],
-            );
-        }
-    }
-    bg.commit(&mut vram);
-    bg.set_visible(true);
+    bg.fill_with(&background::TILES);
 
     // game loop
     loop {
+        let mut frame = gfx.frame();
         for gameobject in gameobjects.iter_mut() {
             gameobject.behave();
-            gameobject.render();
+            gameobject.render(&mut frame);
         }
     
-        // Wait for vblank, then commit the objects to the screen
-        // todo: don't busy wait for vblank, use interrupt
-        agb::display::busy_wait_for_vblank();
-        oam.commit();
+        bg.show(&mut frame);
+        frame.commit();
     }
 }

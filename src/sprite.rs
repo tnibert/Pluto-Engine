@@ -4,16 +4,18 @@ use agb::{
         object::{Object}
     },
 };
+use agb::fixnum::vec2;
+use agb::display::GraphicsFrame;
 
-pub struct Sprite <'a> {
+pub struct Sprite {
     x: i32,
     y: i32,
     velocity: i32,
-    pub object: Object <'a>,
+    pub object: Object,
 }
 
-impl <'a> Sprite <'a> {
-    pub fn new(x: i32, y: i32, velocity: i32, object: Object<'a>) -> Sprite<'a>{
+impl Sprite {
+    pub fn new(x: i32, y: i32, velocity: i32, object: Object) -> Sprite{
         Self {
             x: x,
             y: y,
@@ -48,13 +50,14 @@ impl <'a> Sprite <'a> {
     }
 }
 
-impl GameObject for Sprite<'_> {
+impl GameObject for Sprite {
     fn behave(&mut self) {}
 
-    fn render(&mut self) {
-        let x = self.get_x() as u16;
-        let y = self.get_y() as u16;
-        self.object.set_x(x).set_y(y).show();
+    fn render(&mut self, frame: &mut GraphicsFrame) {
+        let x = self.get_x();
+        let y = self.get_y();
+        let pos = vec2(x, y);
+        self.object.set_pos(pos).show(frame);
     }
 }
 

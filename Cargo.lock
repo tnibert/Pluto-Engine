@@ -10,9 +10,9 @@ checksum = "512761e0bb2578dd7380c6baaa0f4ce03e84f95e960231d1dec8bf4d7d6e2627"
 
 [[package]]
 name = "agb"
-version = "0.21.3"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9868b47ec3465f4b323eb5ea2bbe5e66b2bb4ed22c88c53ddc6c4d2dea04139c"
+checksum = "0427189282c6a09f6d30c7e6c5a68590ec586adb8cc2a0072f63ec9a0bb80948"
 dependencies = [
  "agb_fixnum",
  "agb_hashmap",
@@ -29,28 +29,29 @@ dependencies = [
 
 [[package]]
 name = "agb_fixnum"
-version = "0.21.3"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c185aafe6928e0ab120e90f966629f483155bc04cef6b1bba5d80a15b0ad70c"
+checksum = "c38b06bd99e17230c451c4f89db1660d63dd2bfbc2f795eae6f65341ab68fbf7"
 dependencies = [
- "agb_macros",
+ "const_soft_float",
  "num-traits",
+ "quote",
 ]
 
 [[package]]
 name = "agb_hashmap"
-version = "0.21.3"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "138a1928f41a47a9ab2a538db474dd3e3f6f1dbb55326c394c19fdf395272ce5"
+checksum = "f4df990174028090f61d20abb38df662ace65ed15099cd19f02a4944b8d8449e"
 dependencies = [
  "rustc-hash",
 ]
 
 [[package]]
 name = "agb_image_converter"
-version = "0.21.3"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4cba071da52a2e6017a5955f8a7667bd8a8457ccb856b573753ed42dcb22bfe"
+checksum = "8af2a238c7537ecf5ea51137f2cfed72c86d9ec60a3b318c86f66f92558f6c17"
 dependencies = [
  "asefile",
  "fontdue",
@@ -58,14 +59,15 @@ dependencies = [
  "pagination-packing",
  "proc-macro2",
  "quote",
+ "snafu",
  "syn",
 ]
 
 [[package]]
 name = "agb_macros"
-version = "0.21.3"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25a14e2ed51fb890c0299e7273199ff1578f34ef632b7c4f1b8b09b263d9296e"
+checksum = "f07745ef20adc7c145fe1f31d0859a79217bd4635ba1594bae2bf120a151b61f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -73,18 +75,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "agb_play"
-version = "0.1.0"
-dependencies = [
- "agb",
- "critical-section",
-]
-
-[[package]]
 name = "agb_sound_converter"
-version = "0.21.3"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45948f3b971eb84d9afa79ac085926558a7d42afcb2cbc2109f293b421ed5507"
+checksum = "e08d8b22b009f39ed0e1c2207ebdbf3f12c3218c036b317d94cffd23af78a119"
 dependencies = [
  "hound",
  "proc-macro2",
@@ -184,6 +178,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
+name = "const_soft_float"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87ca1caa64ef4ed453e68bb3db612e51cf1b2f5b871337f0fcab1c8f87cc3dff"
+
+[[package]]
 name = "crc32fast"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -255,6 +255,12 @@ dependencies = [
  "equivalent",
  "foldhash",
 ]
+
+[[package]]
+name = "heck"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hound"
@@ -404,10 +410,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
+name = "saturn_engine"
+version = "0.1.0"
+dependencies = [
+ "agb",
+ "critical-section",
+]
+
+[[package]]
 name = "simd-adler32"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
+
+[[package]]
+name = "snafu"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "320b01e011bf8d5d7a4a4a4be966d9160968935849c83b918827f6a435e7f627"
+dependencies = [
+ "snafu-derive",
+]
+
+[[package]]
+name = "snafu-derive"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1961e2ef424c1424204d3a5d6975f934f56b6d50ff5732382d84ebf460e147f7"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "syn"

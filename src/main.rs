@@ -15,6 +15,7 @@
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
 use lib::gameobject::GameObject;
+use lib::observer::Event;
 use lib::player::Player;
 use lib::movingstone::MovingStone;
 use lib::runningstone::RunningStone;
@@ -26,7 +27,6 @@ extern crate alloc;
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-use alloc::string::String;
 
 use agb::{
     display::{
@@ -79,13 +79,13 @@ fn main(mut gba: agb::Gba) -> ! {
     // set up communication pathways
     // player listens for reset from moving stone
     let mut evts = Vec::new();
-    evts.push(String::from("reset"));
+    evts.push(Event::Position);
     // todo: unify subscribe() behind a trait, with a common signature between it and Observable
     moving_stone.subscribe(player.observer(), evts);
 
     // running stone listens for position from player
     let mut evts = Vec::new();
-    evts.push(String::from("position"));
+    evts.push(Event::Position);
     let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
     player.subscribe(running_stone.observer(), evts);
 

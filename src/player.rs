@@ -52,30 +52,30 @@ impl GameObject for Player {
 
         if self.input.is_pressed(Button::UP) && self.sprite.get_y() > 0 {
             self.sprite.update_pos(Direction::UP);
-            self.signals_out.notify(String::from("position"));
+            self.signals_out.notify(Event::Position);
         }
         if self.input.is_pressed(Button::DOWN) && self.sprite.get_y() < agb::display::HEIGHT - BALL_SIZE {
             self.sprite.update_pos(Direction::DOWN);
-            self.signals_out.notify(String::from("position"));
+            self.signals_out.notify(Event::Position);
         }
         if self.input.is_pressed(Button::LEFT) && self.sprite.get_x() > 0 {
             self.sprite.update_pos(Direction::LEFT);
-            self.signals_out.notify(String::from("position"));
+            self.signals_out.notify(Event::Position);
         }
         if self.input.is_pressed(Button::RIGHT) && self.sprite.get_x() < agb::display::WIDTH - BALL_SIZE {
             self.sprite.update_pos(Direction::RIGHT);
-            self.signals_out.notify(String::from("position"));
+            self.signals_out.notify(Event::Position);
         }
 
         // check event subscriptions
         for e in self.observer.poll_evt() {
-            match e.as_str() {
-                /*"reset" => {
+            match e {
+                Event::Reset => {
                     for _ in 0..10 {
-                        // just a test to make sure it works
+                        // just a test to make sure observer works
                         self.sprite.update_pos(Direction::DOWN);
                     }
-                },*/
+                },
                 _ => ()
             }
         }

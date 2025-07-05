@@ -43,7 +43,7 @@ impl MovingStone {
 impl GameObject for MovingStone {
     fn behave(&mut self) {
         if self.sprite.get_x()+BALL_SIZE <= 0 {
-            self.signals_out.notify(String::from("reset"));
+            self.signals_out.notify(Event::Reset);
             self.sprite.set_x(agb::display::WIDTH);
         } else {
             self.sprite.update_pos(Direction::LEFT);

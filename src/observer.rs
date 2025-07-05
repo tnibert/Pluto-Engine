@@ -10,7 +10,15 @@ use alloc::string::String;
  * Modified implementation of observer pattern for propagating events
  */
 
-pub type Event = String;
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
+pub enum Event {
+    Left,
+    Right,
+    Down,
+    Up,
+    Position,
+    Reset
+}
 
 pub struct Listener {
     ledger: RefCell<Vec<Event>>
@@ -37,7 +45,7 @@ impl Listener {
 
 pub struct Observable {
     name: String,   // will be used to give source information
-    subscribers: BTreeMap<Event, Vec<Rc<Listener>>>
+    subscribers: BTreeMap<Event, Vec<Rc<Listener>>> //HashMap<Discriminant<Event>, Vec<Rc<Listener>>>
 }
 
 // todo: unsubscribe

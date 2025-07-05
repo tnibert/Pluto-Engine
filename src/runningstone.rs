@@ -5,7 +5,7 @@ use agb::display::GraphicsFrame;
 use alloc::rc::Rc;
 
 use crate::gameobject::GameObject;
-use crate::observer::Listener;
+use crate::observer::{Event, Listener};
 use crate::sprite::{Sprite, Direction};
 
 pub struct RunningStone{
@@ -37,8 +37,8 @@ impl GameObject for RunningStone {
     fn behave(&mut self) {
         // check event subscriptions
         for e in self.observer.poll_evt() {
-            match e.as_str() {
-                "position" => {
+            match e {
+                Event::Position => {
                     for _ in 0..5 {
                         self.sprite.update_pos(Direction::DOWN);
                     }

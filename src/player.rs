@@ -1,18 +1,23 @@
 extern crate alloc;
 
 use crate::gameobject::GameObject;
-use crate::observer::Listener;
+use crate::observer::{Observable, Listener, Event};
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
 use agb::input::{Button, ButtonController};
 use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::vec::Vec;
+
+const NAME: &str = "player";
 
 pub struct Player {
     sprite: Sprite,
     input: ButtonController,
-    pub observer: Rc<Listener>
+    observer: Rc<Listener>,
+    signals_out: Observable
 }
 
 impl Player {
@@ -25,7 +30,18 @@ impl Player {
                 object
             ),
             input: ButtonController::new(),  // supposedly I can create two of these, should test how it behaves in practice
-            observer: Rc::new(Listener::new())
+            observer: Rc::new(Listener::new()),
+            signals_out: Observable::new(String::from(NAME))
+        }
+    }
+
+    pub fn observer(&self) -> Rc<Listener> {
+        return self.observer.clone()
+    }
+
+    pub fn subscribe(&mut self, subscriber: Rc<Listener>, events: Vec<Event>) {
+        for en in events {
+            self.signals_out.subscribe(en, subscriber.clone());
         }
     }
 }
@@ -36,26 +52,30 @@ impl GameObject for Player {
 
         if self.input.is_pressed(Button::UP) && self.sprite.get_y() > 0 {
             self.sprite.update_pos(Direction::UP);
+            self.signals_out.notify(String::from("position"));
         }
         if self.input.is_pressed(Button::DOWN) && self.sprite.get_y() < agb::display::HEIGHT - BALL_SIZE {
             self.sprite.update_pos(Direction::DOWN);
+            self.signals_out.notify(String::from("position"));
         }
         if self.input.is_pressed(Button::LEFT) && self.sprite.get_x() > 0 {
             self.sprite.update_pos(Direction::LEFT);
+            self.signals_out.notify(String::from("position"));
         }
         if self.input.is_pressed(Button::RIGHT) && self.sprite.get_x() < agb::display::WIDTH - BALL_SIZE {
             self.sprite.update_pos(Direction::RIGHT);
+            self.signals_out.notify(String::from("position"));
         }
 
         // check event subscriptions
         for e in self.observer.poll_evt() {
             match e.as_str() {
-                "reset" => {
+                /*"reset" => {
                     for _ in 0..10 {
                         // just a test to make sure it works
                         self.sprite.update_pos(Direction::DOWN);
                     }
-                },
+                },*/
                 _ => ()
             }
         }

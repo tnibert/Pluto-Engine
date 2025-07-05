@@ -17,7 +17,7 @@
 use lib::gameobject::GameObject;
 use lib::player::Player;
 use lib::movingstone::MovingStone;
-use lib::sprite::Sprite;
+use lib::runningstone::RunningStone;
 use lib::background::Background;
 use lib::agb_background;
 use lib::BALL_SIZE;
@@ -54,6 +54,7 @@ include_aseprite!(
 // and interrupt handlers correctly. It will also handle creating the `Gba` struct for you.
 #[agb::entry]
 fn main(mut gba: agb::Gba) -> ! {
+    agb::println!("Start main");
     // Get the graphics manager, responsible for all the graphics
     let mut gfx = gba.graphics.get();
 
@@ -72,19 +73,25 @@ fn main(mut gba: agb::Gba) -> ! {
 
     // Create game objects
     let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
-    let player = Box::new(Player::new(ball));
+    let mut player = Box::new(Player::new(ball));
     let mut moving_stone = Box::new(MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid));
 
     // set up communication pathways
+    // player listens for reset from moving stone
     let mut evts = Vec::new();
     evts.push(String::from("reset"));
-    moving_stone.subscribe(player.observer.clone(), evts);
+    // todo: unify subscribe() behind a trait, with a common signature between it and Observable
+    moving_stone.subscribe(player.observer(), evts);
+
+    // running stone listens for position from player
+    let mut evts = Vec::new();
+    evts.push(String::from("position"));
+    let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
+    player.subscribe(running_stone.observer(), evts);
 
     gameobjects.push(player);
     gameobjects.push(moving_stone);
-    gameobjects.push(Box::new(
-        Sprite::new(20, 20, 0, paddle_end)
-    ));
+    gameobjects.push(running_stone);
     gameobjects.push(Box::new(
         Background::new()
     ));

@@ -4,11 +4,14 @@ use agb::display::object::Object;
 use agb::display::GraphicsFrame;
 use alloc::string::String;
 use alloc::vec::Vec;
+use alloc::rc::Rc;
 
 use crate::gameobject::GameObject;
 use crate::observer::{Event, Listener, Observable};
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
+
+const NAME: &str = "movingstone";
 
 pub struct MovingStone{
     sprite: Sprite,
@@ -24,13 +27,13 @@ impl MovingStone{
                 1,
                 object
             ),
-            signals_out: Observable::new(String::from("movingstone"))
+            signals_out: Observable::new(String::from(NAME))
         }
     }
 }
 
 impl MovingStone {
-    pub fn subscribe(&mut self, subscriber: alloc::rc::Rc<Listener>, events: Vec<Event>) {
+    pub fn subscribe(&mut self, subscriber: Rc<Listener>, events: Vec<Event>) {
         for en in events {
             self.signals_out.subscribe(en, subscriber.clone());
         }

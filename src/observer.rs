@@ -50,7 +50,6 @@ impl Observable {
     }
 
     // Subscribe an Observer to an event
-    // idea: should explicitly prevent subscribing the same Observer twice?
     pub fn subscribe(&mut self, evt: Event, subscriber: Rc<Listener>) {
         match self.subscribers.get_mut(&evt) {
             Some(vec) => vec.push(subscriber),

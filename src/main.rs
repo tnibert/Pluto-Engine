@@ -21,6 +21,7 @@ use lib::movingstone::MovingStone;
 use lib::runningstone::RunningStone;
 use lib::background::Background;
 use lib::agb_background;
+use lib::agb_sprites;
 use lib::BALL_SIZE;
 
 extern crate alloc;
@@ -33,21 +34,9 @@ use agb::{
         object::Object,
         tiled::VRAM_MANAGER
     },
-    include_aseprite,
     interrupt::{add_interrupt_handler, Interrupt}
 };
 use critical_section::CriticalSection;
-
-// Import the sprites in to this static. This holds the sprite 
-// and palette data in a way that is manageable by agb.
-include_aseprite!(
-    mod agb_sprites,
-    "gfx/sprites.aseprite"
-);
-
-//include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");
-//use sprites::{JUMP, WALK};
-//static IDLE: &Sprite = sprites::IDLE.sprite(0);
 
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack

@@ -6,6 +6,7 @@ use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
+use agb::fixnum::{vec2, Rect};
 use agb::input::{Button, ButtonController};
 use alloc::rc::Rc;
 use alloc::string::String;
@@ -52,20 +53,18 @@ impl GameObject for Player {
 
         if self.input.is_pressed(Button::UP) && self.sprite.get_y() > 0 {
             self.sprite.update_pos(Direction::UP);
-            self.signals_out.notify(Event::Position);
         }
         if self.input.is_pressed(Button::DOWN) && self.sprite.get_y() < agb::display::HEIGHT - BALL_SIZE {
             self.sprite.update_pos(Direction::DOWN);
-            self.signals_out.notify(Event::Position);
         }
         if self.input.is_pressed(Button::LEFT) && self.sprite.get_x() > 0 {
             self.sprite.update_pos(Direction::LEFT);
-            self.signals_out.notify(Event::Position);
         }
         if self.input.is_pressed(Button::RIGHT) && self.sprite.get_x() < agb::display::WIDTH - BALL_SIZE {
             self.sprite.update_pos(Direction::RIGHT);
-            self.signals_out.notify(Event::Position);
         }
+
+        self.signals_out.notify(Event::Position(Rect::new(vec2(self.sprite.get_x(), self.sprite.get_y()), vec2(BALL_SIZE, BALL_SIZE))));
 
         // check event subscriptions
         for e in self.observer.poll_evt() {

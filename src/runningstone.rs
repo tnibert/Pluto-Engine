@@ -2,11 +2,13 @@ extern crate alloc;
 
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
+use agb::fixnum::{vec2, Rect};
 use alloc::rc::Rc;
 
 use crate::gameobject::GameObject;
 use crate::observer::{Event, Listener};
 use crate::sprite::{Sprite, Direction};
+use crate::BALL_SIZE;
 
 pub struct RunningStone{
     sprite: Sprite,
@@ -38,9 +40,11 @@ impl GameObject for RunningStone {
         // check event subscriptions
         for e in self.observer.poll_evt() {
             match e {
-                Event::Position => {
-                    for _ in 0..5 {
-                        self.sprite.update_pos(Direction::DOWN);
+                Event::Position(r) => {
+                    if r.touches(Rect::new(vec2(self.sprite.get_x(), self.sprite.get_y()), vec2(BALL_SIZE, BALL_SIZE))) {
+                        for _ in 0..5 {
+                            self.sprite.update_pos(Direction::DOWN);
+                        }
                     }
                 },
                 _ => ()

@@ -14,6 +14,8 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
+use agb::fixnum::vec2;
+use agb::fixnum::Rect;
 use lib::gameobject::GameObject;
 use lib::observer::Event;
 use lib::player::Player;
@@ -64,20 +66,19 @@ fn main(mut gba: agb::Gba) -> ! {
     let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
     let mut player = Box::new(Player::new(ball));
     let mut moving_stone = Box::new(MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid));
+    let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
 
     // set up communication pathways
-    // player listens for reset from moving stone
+    // running stone listens for reset from moving stone
     let mut evts = Vec::new();
-    evts.push(Event::Position);
+    evts.push(Event::Reset);
     // todo: unify subscribe() behind a trait, with a common signature between it and Observable
-    moving_stone.subscribe(player.observer(), evts);
+    moving_stone.subscribe(running_stone.observer(), evts);
 
     // running stone listens for position from player
     let mut evts = Vec::new();
-    evts.push(Event::Position);
-    let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
+    evts.push(Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
     player.subscribe(running_stone.observer(), evts);
-
     gameobjects.push(player);
     gameobjects.push(moving_stone);
     gameobjects.push(running_stone);

@@ -1,6 +1,9 @@
 extern crate alloc;
 
 use core::cell::RefCell;
+use core::mem;
+use agb::fixnum::Rect;
+use core::cmp::Ordering;
 use alloc::rc::Rc;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
@@ -10,14 +13,30 @@ use alloc::string::String;
  * Modified implementation of observer pattern for propagating events
  */
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Event {
-    Left,
-    Right,
-    Down,
-    Up,
-    Position,
+    Position(Rect<i32>),
     Reset
+}
+
+impl Event {
+    fn enum_index(&self) -> u8 {
+        match *self {
+            Event::Position(_) => 0,
+            Event::Reset => 1,
+        }
+    }
+}
+
+impl Ord for Event {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.enum_index().cmp(&other.enum_index())
+    }
+}
+impl PartialOrd for Event {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
 }
 
 pub struct Listener {

@@ -61,7 +61,7 @@ impl GameObject for RunningStone {
             }
             agb::println!("{}", new_x_pos);
 
-            self.sprite.set_y(BALL_SIZE);
+            self.sprite.set_y(0);
             self.sprite.set_x(new_x_pos);
 
             self.observable.notify(Event::Reset);

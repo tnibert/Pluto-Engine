@@ -25,6 +25,11 @@ include_aseprite!(
     pub mod agb_sprites,
     "gfx/sprites.aseprite"
 );
+include_aseprite!(
+    pub mod agb_crab,
+    "gfx/crab-small.aseprite"
+);
+
 
 // Usage note:
 // include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");

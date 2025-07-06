@@ -6,14 +6,7 @@ use alloc::rc::Rc;
 use agb::{display::{GraphicsFrame, object::Object}, fixnum::{vec2, Rect}};
 
 use crate::{
-    agb_sprites,
-    background::Background,
-    gameobject::GameObject,
-    movingstone::MovingStone,
-    observer::{Event, Listener, Publisher, Subscriber},
-    player::Player,
-    runningstone::RunningStone,
-    BALL_SIZE
+    agb_crab, agb_sprites, background::Background, gameobject::GameObject, movingstone::MovingStone, observer::{Event, Listener, Publisher, Subscriber}, player::Player, runningstone::RunningStone, BALL_SIZE
 };
 
 pub struct Scene {
@@ -29,14 +22,21 @@ impl Scene {
         let ball = Object::new(agb_sprites::BALL.sprite(0));
         let paddle_mid = Object::new(agb_sprites::PADDLE_MID.sprite(0));
         let paddle_end = Object::new(agb_sprites::PADDLE_END.sprite(0));
+        let crab = Object::new(agb_crab::SURPRISED.sprite(0));
 
         // Create game objects
         let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
-        let mut player = Box::new(Player::new(ball));
-        let mut running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
+        let mut player = Box::new(Player::new(crab));
+        let mut running_stone = Box::new(RunningStone::new(20, 0, ball));
 
         for i in 1..9 {
-            let mut moving_stone = Box::new(MovingStone::new(BALL_SIZE * i, BALL_SIZE * i, paddle_mid.clone()));
+            let img: Object;
+            if i & 1 == 0 {
+                img = paddle_mid.clone();
+            } else {
+                img = paddle_end.clone();
+            }
+            let mut moving_stone = Box::new(MovingStone::new(BALL_SIZE * i, BALL_SIZE * i, img));
             moving_stone.register_subscription(player.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
             gameobjects.push(moving_stone);
         }

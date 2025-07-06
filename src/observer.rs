@@ -1,7 +1,6 @@
 extern crate alloc;
 
 use core::cell::RefCell;
-use core::mem;
 use agb::fixnum::Rect;
 use core::cmp::Ordering;
 use alloc::rc::Rc;

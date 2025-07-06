@@ -68,7 +68,7 @@ pub trait Subscriber {
 }
 
 pub trait Publisher {
-    fn subscribe(&mut self, subscriber: Rc<Listener>, evt: Event);
+    fn register_subscription(&mut self, subscriber: Rc<Listener>, evt: Event);
 }
 
 pub struct Observable {
@@ -101,7 +101,7 @@ impl Observable {
 
 impl Publisher for Observable {
     // Subscribe an Observer to an event
-    fn subscribe(&mut self, subscriber: Rc<Listener>, evt: Event) {
+    fn register_subscription(&mut self, subscriber: Rc<Listener>, evt: Event) {
         match self.subscribers.get_mut(&evt) {
             Some(vec) => vec.push(subscriber),
             None => {

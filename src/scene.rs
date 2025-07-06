@@ -20,6 +20,7 @@ pub struct Scene {
 }
 
 impl Scene {
+    // setup the scene
     pub fn new() -> Scene {
         let ball = Object::new(agb_sprites::BALL.sprite(0));
         let paddle_mid = Object::new(agb_sprites::PADDLE_MID.sprite(0));
@@ -28,20 +29,20 @@ impl Scene {
         // Create game objects
         let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
         let mut player = Box::new(Player::new(ball));
-        let mut moving_stone = Box::new(MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid));
         let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
 
+        for i in 0..9 {
+            let moving_stone = Box::new(MovingStone::new(BALL_SIZE * i, BALL_SIZE * i, paddle_mid.clone()));
+            gameobjects.push(moving_stone);
+        }
         // set up communication pathways
-        // running stone listens for reset from moving stone
-        moving_stone.subscribe(running_stone.observer(), Event::Reset);
-
         // running stone listens for position from player
-        player.subscribe(running_stone.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
+        player.register_subscription(running_stone.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
 
         // add gameobjects to the scene graph
         gameobjects.push(player);
-        gameobjects.push(moving_stone);
         gameobjects.push(running_stone);
+
         gameobjects.push(Box::new(
             Background::new()
         ));

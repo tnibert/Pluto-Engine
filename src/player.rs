@@ -25,7 +25,7 @@ impl Player {
         Self {
             sprite: Sprite::new(
                 agb::display::WIDTH / 2 - BALL_SIZE/2,
-                agb::display::HEIGHT / 2 - BALL_SIZE/2,
+                agb::display::HEIGHT - BALL_SIZE,
                 1,
                 object
             ),
@@ -75,8 +75,8 @@ impl GameObject for Player {
 }
 
 impl Publisher for Player {
-    fn subscribe(&mut self, subscriber: Rc<Listener>, event: Event) {
-        self.signals_out.subscribe(subscriber, event);
+    fn register_subscription(&mut self, subscriber: Rc<Listener>, event: Event) {
+        self.signals_out.register_subscription(subscriber, event);
     }
 }
 

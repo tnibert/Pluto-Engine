@@ -47,7 +47,7 @@ impl GameObject for MovingStone {
 }
 
 impl Publisher for MovingStone {
-    fn subscribe(&mut self, subscriber: Rc<Listener>, event: Event) {
-        self.signals_out.subscribe(subscriber, event);
+    fn register_subscription(&mut self, subscriber: Rc<Listener>, event: Event) {
+        self.signals_out.register_subscription(subscriber, event);
     }
 }

@@ -3,11 +3,10 @@ extern crate alloc;
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
 use alloc::string::String;
-use alloc::vec::Vec;
 use alloc::rc::Rc;
 
 use crate::gameobject::GameObject;
-use crate::observer::{Event, Listener, Observable};
+use crate::observer::{Event, Listener, Observable, Publisher};
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 
@@ -32,14 +31,6 @@ impl MovingStone{
     }
 }
 
-impl MovingStone {
-    pub fn subscribe(&mut self, subscriber: Rc<Listener>, events: Vec<Event>) {
-        for en in events {
-            self.signals_out.subscribe(en, subscriber.clone());
-        }
-    }
-}
-
 impl GameObject for MovingStone {
     fn behave(&mut self) {
         if self.sprite.get_x()+BALL_SIZE <= 0 {
@@ -52,5 +43,11 @@ impl GameObject for MovingStone {
 
     fn render(&mut self, frame: &mut GraphicsFrame) {
         self.sprite.render(frame);
+    }
+}
+
+impl Publisher for MovingStone {
+    fn subscribe(&mut self, subscriber: Rc<Listener>, event: Event) {
+        self.signals_out.subscribe(subscriber, event);
     }
 }

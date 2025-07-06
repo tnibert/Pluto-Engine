@@ -19,6 +19,7 @@ pub enum Event {
 }
 
 impl Event {
+    // note: could use Discriminant<Event>
     fn enum_index(&self) -> u8 {
         match *self {
             Event::Position(_) => 0,
@@ -61,9 +62,18 @@ impl Listener {
     }
 }
 
+pub trait Subscriber {
+    // returns a clone of the Listener Rc
+    fn observer(&self) -> Rc<Listener>;
+}
+
+pub trait Publisher {
+    fn subscribe(&mut self, subscriber: Rc<Listener>, evt: Event);
+}
+
 pub struct Observable {
     name: String,   // will be used to give source information
-    subscribers: BTreeMap<Event, Vec<Rc<Listener>>> //HashMap<Discriminant<Event>, Vec<Rc<Listener>>>
+    subscribers: BTreeMap<Event, Vec<Rc<Listener>>> //HashMap<, Vec<Rc<Listener>>>
 }
 
 // todo: unsubscribe
@@ -73,18 +83,6 @@ impl Observable {
             name: name,
             subscribers: BTreeMap::new()
         }
-    }
-
-    // Subscribe an Observer to an event
-    pub fn subscribe(&mut self, evt: Event, subscriber: Rc<Listener>) {
-        match self.subscribers.get_mut(&evt) {
-            Some(vec) => vec.push(subscriber),
-            None => {
-                let mut new_vec = Vec::new();
-                new_vec.push(subscriber);
-                self.subscribers.insert(evt, new_vec);
-            }
-        };
     }
 
     // Notify all subscribers to the given Event
@@ -98,6 +96,20 @@ impl Observable {
             },
             None => {}
         }
+    }
+}
+
+impl Publisher for Observable {
+    // Subscribe an Observer to an event
+    fn subscribe(&mut self, subscriber: Rc<Listener>, evt: Event) {
+        match self.subscribers.get_mut(&evt) {
+            Some(vec) => vec.push(subscriber),
+            None => {
+                let mut new_vec = Vec::new();
+                new_vec.push(subscriber);
+                self.subscribers.insert(evt, new_vec);
+            }
+        };
     }
 }
 

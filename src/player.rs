@@ -1,7 +1,7 @@
 extern crate alloc;
 
 use crate::gameobject::GameObject;
-use crate::observer::{Observable, Listener, Event};
+use crate::observer::{Event, Listener, Observable, Publisher, Subscriber};
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 use agb::display::object::Object;
@@ -10,7 +10,6 @@ use agb::fixnum::{vec2, Rect};
 use agb::input::{Button, ButtonController};
 use alloc::rc::Rc;
 use alloc::string::String;
-use alloc::vec::Vec;
 
 const NAME: &str = "player";
 
@@ -33,16 +32,6 @@ impl Player {
             input: ButtonController::new(),  // supposedly I can create two of these, should test how it behaves in practice
             observer: Rc::new(Listener::new()),
             signals_out: Observable::new(String::from(NAME))
-        }
-    }
-
-    pub fn observer(&self) -> Rc<Listener> {
-        return self.observer.clone()
-    }
-
-    pub fn subscribe(&mut self, subscriber: Rc<Listener>, events: Vec<Event>) {
-        for en in events {
-            self.signals_out.subscribe(en, subscriber.clone());
         }
     }
 }
@@ -82,5 +71,17 @@ impl GameObject for Player {
 
     fn render(&mut self, frame: &mut GraphicsFrame) {
         self.sprite.render(frame);
+    }
+}
+
+impl Publisher for Player {
+    fn subscribe(&mut self, subscriber: Rc<Listener>, event: Event) {
+        self.signals_out.subscribe(subscriber, event);
+    }
+}
+
+impl Subscriber for Player {
+    fn observer(&self) -> Rc<Listener> {
+        return self.observer.clone()
     }
 }

@@ -4,7 +4,16 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 use agb::{display::{GraphicsFrame, object::Object}, fixnum::{vec2, Rect}};
 
-use crate::{agb_sprites, background::Background, gameobject::GameObject, movingstone::MovingStone, observer::Event, player::Player, runningstone::RunningStone, BALL_SIZE};
+use crate::{
+    agb_sprites,
+    background::Background,
+    gameobject::GameObject,
+    movingstone::MovingStone,
+    observer::{Event, Publisher, Subscriber},
+    player::Player,
+    runningstone::RunningStone,
+    BALL_SIZE
+};
 
 pub struct Scene {
     gameobjects: Vec<Box<dyn GameObject>>
@@ -24,15 +33,12 @@ impl Scene {
 
         // set up communication pathways
         // running stone listens for reset from moving stone
-        let mut evts = Vec::new();
-        evts.push(Event::Reset);
-        // todo: unify subscribe() behind a trait, with a common signature between it and Observable
-        moving_stone.subscribe(running_stone.observer(), evts);
+        moving_stone.subscribe(running_stone.observer(), Event::Reset);
 
         // running stone listens for position from player
-        let mut evts = Vec::new();
-        evts.push(Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
-        player.subscribe(running_stone.observer(), evts);
+        player.subscribe(running_stone.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
+
+        // add gameobjects to the scene graph
         gameobjects.push(player);
         gameobjects.push(moving_stone);
         gameobjects.push(running_stone);

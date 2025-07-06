@@ -6,7 +6,7 @@ use agb::fixnum::{vec2, Rect};
 use alloc::rc::Rc;
 
 use crate::gameobject::GameObject;
-use crate::observer::{Event, Listener};
+use crate::observer::{Event, Listener, Subscriber};
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
 
@@ -29,12 +29,6 @@ impl RunningStone{
     }
 }
 
-impl RunningStone {
-    pub fn observer(&self) -> Rc<Listener> {
-        return self.observer.clone()
-    }
-}
-
 impl GameObject for RunningStone {
     fn behave(&mut self) {
         // check event subscriptions
@@ -54,5 +48,11 @@ impl GameObject for RunningStone {
 
     fn render(&mut self, frame: &mut GraphicsFrame) {
         self.sprite.render(frame);
+    }
+}
+
+impl Subscriber for RunningStone {
+    fn observer(&self) -> Rc<Listener> {
+        return self.observer.clone()
     }
 }

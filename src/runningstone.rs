@@ -3,11 +3,11 @@ extern crate alloc;
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
 use agb::fixnum::{vec2, Rect};
-use agb::rng;
 use alloc::rc::Rc;
 use alloc::string::String;
 
 use crate::gameobject::GameObject;
+use crate::math::random_constrained_positive;
 use crate::observer::{Event, Listener, Observable, Publisher, Subscriber};
 use crate::sprite::{Sprite, Direction};
 use crate::BALL_SIZE;
@@ -54,13 +54,7 @@ impl GameObject for RunningStone {
 
         // notify if running stone has been retrieved to bottom of the screen
         if self.sprite.get_y() >= agb::display::HEIGHT {
-            let mut new_x_pos = rng::next_i32() % (agb::display::WIDTH-BALL_SIZE);
-            // todo: I feel like there is some bit twiddling wizardry to take absolute value of i32
-            if new_x_pos < 0 {
-                new_x_pos = new_x_pos * -1;
-            }
-            agb::println!("{}", new_x_pos);
-
+            let new_x_pos = random_constrained_positive(agb::display::WIDTH - BALL_SIZE);
             self.sprite.set_y(0);
             self.sprite.set_x(new_x_pos);
 

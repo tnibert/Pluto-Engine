@@ -14,6 +14,7 @@ pub mod movingstone;
 pub mod runningstone;
 pub mod observer;
 pub mod background;
+pub mod scene;
 
 // load assets into binary
 include_background_gfx!(

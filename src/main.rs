@@ -14,26 +14,13 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
-use agb::fixnum::vec2;
-use agb::fixnum::Rect;
 use lib::gameobject::GameObject;
-use lib::observer::Event;
-use lib::player::Player;
-use lib::movingstone::MovingStone;
-use lib::runningstone::RunningStone;
-use lib::background::Background;
+use lib::scene::Scene;
 use lib::agb_background;
-use lib::agb_sprites;
-use lib::BALL_SIZE;
 
-extern crate alloc;
-
-use alloc::boxed::Box;
-use alloc::vec::Vec;
 
 use agb::{
     display::{
-        object::Object,
         tiled::VRAM_MANAGER
     },
     interrupt::{add_interrupt_handler, Interrupt}
@@ -49,10 +36,6 @@ fn main(mut gba: agb::Gba) -> ! {
     // Get the graphics manager, responsible for all the graphics
     let mut gfx = gba.graphics.get();
 
-    let ball = Object::new(agb_sprites::BALL.sprite(0));
-    let paddle_mid = Object::new(agb_sprites::PADDLE_MID.sprite(0));
-    let paddle_end = Object::new(agb_sprites::PADDLE_END.sprite(0));
-
     // vblank interrupt handler
     unsafe {
         let _ = add_interrupt_handler(Interrupt::VBlank, |_: CriticalSection| {
@@ -62,37 +45,16 @@ fn main(mut gba: agb::Gba) -> ! {
 
     VRAM_MANAGER.set_background_palettes(agb_background::PALETTES);
 
-    // Create game objects
-    let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
-    let mut player = Box::new(Player::new(ball));
-    let mut moving_stone = Box::new(MovingStone::new(agb::display::WIDTH/2, agb::display::HEIGHT - BALL_SIZE, paddle_mid));
-    let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
+    // initialize the game
+    let mut game = Scene::new();
 
-    // set up communication pathways
-    // running stone listens for reset from moving stone
-    let mut evts = Vec::new();
-    evts.push(Event::Reset);
-    // todo: unify subscribe() behind a trait, with a common signature between it and Observable
-    moving_stone.subscribe(running_stone.observer(), evts);
-
-    // running stone listens for position from player
-    let mut evts = Vec::new();
-    evts.push(Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
-    player.subscribe(running_stone.observer(), evts);
-    gameobjects.push(player);
-    gameobjects.push(moving_stone);
-    gameobjects.push(running_stone);
-    gameobjects.push(Box::new(
-        Background::new()
-    ));
-
-    // game loop
     loop {
+        // update the scene
+        game.behave();
+
+        // render the scene
         let mut frame = gfx.frame();
-        for gameobject in gameobjects.iter_mut() {
-            gameobject.behave();
-            gameobject.render(&mut frame);
-        }
+        game.render(&mut frame);
         frame.commit();
     }
 }

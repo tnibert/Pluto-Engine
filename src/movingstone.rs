@@ -2,6 +2,7 @@ extern crate alloc;
 
 use agb::display::object::Object;
 use agb::display::GraphicsFrame;
+use agb::fixnum::{vec2, Rect};
 use alloc::string::String;
 use alloc::rc::Rc;
 
@@ -39,6 +40,7 @@ impl GameObject for MovingStone {
         } else {
             self.sprite.update_pos(Direction::LEFT);
         }
+        self.signals_out.notify(Event::Position(Rect::new(vec2(self.sprite.get_x(), self.sprite.get_y()), vec2(BALL_SIZE, BALL_SIZE))));
     }
 
     fn render(&mut self, frame: &mut GraphicsFrame) {

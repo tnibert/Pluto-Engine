@@ -32,7 +32,8 @@ impl Scene {
         let running_stone = Box::new(RunningStone::new(20, 20, paddle_end));
 
         for i in 0..9 {
-            let moving_stone = Box::new(MovingStone::new(BALL_SIZE * i, BALL_SIZE * i, paddle_mid.clone()));
+            let mut moving_stone = Box::new(MovingStone::new(BALL_SIZE * i, BALL_SIZE * i, paddle_mid.clone()));
+            moving_stone.register_subscription(player.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
             gameobjects.push(moving_stone);
         }
         // set up communication pathways

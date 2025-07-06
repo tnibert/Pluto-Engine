@@ -12,6 +12,8 @@ use alloc::rc::Rc;
 use alloc::string::String;
 
 const NAME: &str = "player";
+const ORIGINAL_X: i32 = agb::display::WIDTH / 2 - BALL_SIZE/2;
+const ORIGINAL_Y: i32 = agb::display::HEIGHT - BALL_SIZE;
 
 pub struct Player {
     sprite: Sprite,
@@ -24,8 +26,8 @@ impl Player {
     pub fn new(object: Object) -> Player {
         Self {
             sprite: Sprite::new(
-                agb::display::WIDTH / 2 - BALL_SIZE/2,
-                agb::display::HEIGHT - BALL_SIZE,
+                ORIGINAL_X,
+                ORIGINAL_Y,
                 1,
                 object
             ),
@@ -58,10 +60,10 @@ impl GameObject for Player {
         // check event subscriptions
         for e in self.observer.poll_evt() {
             match e {
-                Event::Reset => {
-                    for _ in 0..10 {
-                        // just a test to make sure observer works
-                        self.sprite.update_pos(Direction::DOWN);
+                Event::Position(r) => {
+                    if r.touches(Rect::new(vec2(self.sprite.get_x(), self.sprite.get_y()), vec2(BALL_SIZE, BALL_SIZE))) {
+                        self.sprite.set_x(ORIGINAL_X);
+                        self.sprite.set_y(ORIGINAL_Y);
                     }
                 },
                 _ => ()

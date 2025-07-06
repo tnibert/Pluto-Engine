@@ -6,7 +6,7 @@ use alloc::rc::Rc;
 use agb::{display::{GraphicsFrame, object::Object}, fixnum::{vec2, Rect}};
 
 use crate::{
-    agb_crab, agb_sprites, background::Background, gameobject::GameObject, movingstone::MovingStone, observer::{Event, Listener, Publisher, Subscriber}, player::Player, runningstone::RunningStone, BALL_SIZE
+    agb_crab, agb_sprites, background::Background, gameobject::GameObject, math::random_constrained_positive, movingstone::MovingStone, observer::{Event, Listener, Publisher, Subscriber}, player::Player, runningstone::RunningStone, BALL_SIZE
 };
 
 pub struct Scene {
@@ -36,7 +36,7 @@ impl Scene {
             } else {
                 img = paddle_end.clone();
             }
-            let mut moving_stone = Box::new(MovingStone::new(BALL_SIZE * i, BALL_SIZE * i, img));
+            let mut moving_stone = Box::new(MovingStone::new(random_constrained_positive(agb::display::WIDTH - BALL_SIZE), BALL_SIZE * i, img));
             moving_stone.register_subscription(player.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
             gameobjects.push(moving_stone);
         }

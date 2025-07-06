@@ -48,6 +48,10 @@ impl Sprite {
     pub fn set_y(&mut self, y: i32) {
         self.y = y;
     }
+
+    pub fn set_velocity(&mut self, velocity: i32) {
+        self.velocity = velocity;
+    }
 }
 
 impl GameObject for Sprite {

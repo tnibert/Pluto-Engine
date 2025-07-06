@@ -8,6 +8,7 @@ fn abs(x: i32) -> i32 {
 }
 
 /// Returns a pseudorandom positive number less than max.
+/// todo: add a min constraint.
 pub fn random_constrained_positive(max: i32) -> i32 {
     abs(rng::next_i32() % max)
 }

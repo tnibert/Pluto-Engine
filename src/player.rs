@@ -55,6 +55,7 @@ impl GameObject for Player {
             self.sprite.update_pos(Direction::RIGHT);
         }
 
+        //agb::println!("player sending position");
         self.signals_out.notify(Event::Position(Rect::new(vec2(self.sprite.get_x(), self.sprite.get_y()), vec2(BALL_SIZE, BALL_SIZE))));
 
         // check event subscriptions

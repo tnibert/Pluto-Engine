@@ -14,16 +14,15 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
-use lib::gameobject::GameObject;
+use lib::{gameobject::GameObject, music::BackgroundMusic};
 use lib::scene::Scene;
 use lib::agb_background;
 
 
 use agb::{
-    display::{
-        tiled::VRAM_MANAGER
-    },
-    interrupt::{add_interrupt_handler, Interrupt}
+    display::tiled::VRAM_MANAGER,
+    interrupt::{add_interrupt_handler, Interrupt},
+    sound::mixer::Frequency
 };
 use critical_section::CriticalSection;
 
@@ -48,13 +47,20 @@ fn main(mut gba: agb::Gba) -> ! {
     // initialize the game
     let mut game = Scene::new();
 
+    // setup the background music
+    // todo: encapsulate this into the Scene
+    let mut mixer = gba.mixer.mixer(Frequency::Hz32768);
+    let mut bgm = BackgroundMusic::new(&mut mixer);
+
     loop {
         // update the scene
         game.behave();
+        bgm.behave();
 
         // render the scene
         let mut frame = gfx.frame();
         game.render(&mut frame);
+        bgm.render(&mut frame);
         frame.commit();
     }
 }

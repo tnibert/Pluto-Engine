@@ -3,7 +3,7 @@ extern crate alloc;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 use alloc::rc::Rc;
-use agb::{display::{GraphicsFrame, object::Object}, fixnum::{vec2, Rect}};
+use agb::{display::{object::Object, GraphicsFrame}, fixnum::{vec2, Rect}};
 
 use crate::{
     agb_crab, agb_sprites, background::Background, gameobject::GameObject, math::random_constrained_positive, movingstone::MovingStone, observer::{Event, Listener, Publisher, Subscriber}, player::Player, runningstone::RunningStone, BALL_SIZE

@@ -5,7 +5,10 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
+extern crate alloc;
+
 use agb::{include_background_gfx, include_aseprite};
+use agb_tracker::{Track, include_xm};
 
 pub mod sprite;
 pub mod player;
@@ -16,6 +19,7 @@ pub mod observer;
 pub mod background;
 pub mod scene;
 pub mod math;
+pub mod music;
 
 // load assets into binary
 include_background_gfx!(
@@ -30,7 +34,7 @@ include_aseprite!(
     pub mod agb_crab,
     "gfx/crab-small.aseprite"
 );
-
+static BGM: Track = include_xm!("sfx/bgm.xm");
 
 // Usage note:
 // include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");

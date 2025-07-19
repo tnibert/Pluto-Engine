@@ -38,3 +38,8 @@ make run
 ## Starting development
 
 You can find the documentation for agb [here](https://docs.rs/agb/latest/agb/).
+
+## Asset Credit
+
+- sfx/bgm.xm - Bionic Girl by Drozerix - public domain asset retrieved from https://modarchive.org/module.php?174416.
+- all other assets are from AGB official tutorials

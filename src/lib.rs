@@ -7,7 +7,8 @@
 
 extern crate alloc;
 
-use agb::{include_background_gfx, include_aseprite};
+use agb::{include_background_gfx, include_aseprite, include_font};
+use agb::display::font::Font;
 use agb_tracker::{Track, include_xm};
 
 pub mod sprite;
@@ -20,6 +21,7 @@ pub mod background;
 pub mod scene;
 pub mod math;
 pub mod music;
+pub mod hud;
 
 // load assets into binary
 include_background_gfx!(
@@ -35,6 +37,7 @@ include_aseprite!(
     "gfx/crab-small.aseprite"
 );
 static BGM: Track = include_xm!("sfx/bgm.xm");
+static FONT: Font = include_font!("fonts/NESCyrillic.ttf", 16);
 
 // Usage note:
 // include_aseprite!(mod sprites, "examples/gfx/chicken.aseprite");

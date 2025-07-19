@@ -42,4 +42,5 @@ You can find the documentation for agb [here](https://docs.rs/agb/latest/agb/).
 ## Asset Credit
 
 - sfx/bgm.xm - Bionic Girl by Drozerix - public domain asset retrieved from https://modarchive.org/module.php?174416.
+- fonts/NESCyrillic.ttf - NES Cyrillic by xbost - public domain asset retrieved from https://www.pentacom.jp/pentacom/bitfontmaker2/gallery/?id=234.
 - all other assets are from AGB official tutorials

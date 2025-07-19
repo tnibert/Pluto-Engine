@@ -1,6 +1,6 @@
 build:
 	cargo build --release
-	agb-gbafix target/thumbv4t-none-eabi/release/saturn_engine -o test.gba
+	agb-gbafix target/thumbv4t-none-eabi/release/pluto_engine -o test.gba
 
 run: build
 	mgba-qt test.gba

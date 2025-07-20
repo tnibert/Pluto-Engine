@@ -18,10 +18,13 @@ use agb::{
 use alloc::rc::Rc;
 use alloc::vec::Vec;
 
-const MAX_GROUP_WIDTH: i32 = 32;
-const MAX_LINE_LENGTH: i32 = 20;
-const SCORE_X: i32 = agb::display::WIDTH / 2;
+const MAX_GROUP_WIDTH: i32 = 16;
+const MAX_LINE_LENGTH: i32 = 200;
+const SCORE_X: i32 = 0;
 const SCORE_Y: i32 = 0;
+const MAX_SCORE: i32 = 9999;
+const SCORE_INCREASE: i32 = 5;
+const SCORE_WIDTH: usize = 4;
 
 static PALETTE: &Palette16 = const {
     let mut palette = [Rgb15::BLACK; 16];
@@ -54,7 +57,9 @@ impl GameObject for HUD {
         for e in self.observer.poll_evt() {
             match e {
                 Event::Reset => {
-                    self.score += 5;
+                    if self.score < MAX_SCORE - SCORE_INCREASE {
+                        self.score += SCORE_INCREASE;
+                    }
                 },
                 _ => ()
             }
@@ -63,9 +68,9 @@ impl GameObject for HUD {
 
     fn render(&mut self, frame: &mut GraphicsFrame) {
         let layout = Layout::new(
-            format!("{:5}", self.score).as_str(),
+            format!("{:01$}", self.score, SCORE_WIDTH).as_str(),
             &FONT,
-            AlignmentKind::Centre,
+            AlignmentKind::Left,
             MAX_GROUP_WIDTH,
             MAX_LINE_LENGTH,
         );

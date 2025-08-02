@@ -27,9 +27,19 @@ impl Scene {
         // Create game objects
         let mut gameobjects: Vec<Box<dyn GameObject>> = Vec::new();
         let mut player = Box::new(Player::new(crab));
-        let mut running_stone = Box::new(RunningStone::new(20, 0, ball));
+        let mut running_stone = Box::new(RunningStone::new(agb::display::WIDTH/2 - BALL_SIZE/2, 0, ball));
         let hud = Box::new(HUD::new());
         let bg = Box::new(Background::new());
+
+        // running stone listens for position from player
+        player.register_subscription(running_stone.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
+        // scene listens for reset from running stone
+        running_stone.register_subscription(scene_observer.clone(), Event::Reset);
+        // HUD listens for reset from running stone
+        running_stone.register_subscription(hud.observer(), Event::Reset);
+
+        // add gameobjects to the scene graph
+        gameobjects.push(hud);
 
         // establish communication pathways
         // create moving stones
@@ -45,18 +55,9 @@ impl Scene {
             gameobjects.push(moving_stone);
         }
 
-        // running stone listens for position from player
-        player.register_subscription(running_stone.observer(), Event::Position(Rect::new(vec2(0, 0), vec2(0, 0))));
-        // scene listens for reset from running stone
-        running_stone.register_subscription(scene_observer.clone(), Event::Reset);
-        // todo: HUD listens for reset from running stone
-        running_stone.register_subscription(hud.observer(), Event::Reset);
-
-        // add gameobjects to the scene graph
         gameobjects.push(player);
         gameobjects.push(running_stone);
         gameobjects.push(bg);
-        gameobjects.push(hud);
 
         Self {
             gameobjects: gameobjects,
